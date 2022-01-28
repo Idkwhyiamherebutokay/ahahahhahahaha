@@ -5,13 +5,13 @@ var context = canvas.getContext('2d');
 
 
 
-const wall = (x1, y1, x2, y2) => {
+const wall = (x1, y1, w, h) => {
 	console.log("wall? maybe!")
 	context.beginPath();
 
 	context.fillStyle = "green"
 
-	context.rect(x1, y1, x2, y2);
+	context.rect(x1, y1, w, h);
 
 	context.stroke();
 	context.fill();
@@ -28,7 +28,7 @@ const mapAlg = (map) => {
 				console.log("path")
 		
 			} else if (map[bar][gar] == "#") {
-				wall(10 * gar, 10 * bar, 10 * gar + 10, 10 * bar + 10)
+				wall(10 * gar, 10 * bar, 10, 10)
 			}
 		}
 
@@ -36,13 +36,38 @@ const mapAlg = (map) => {
 }
 
 
-let map = [
-"____",
-"#_#_",
-"#_#_",
-"#_#_",
-"__#__#______#"
-]
+let map = []
 
 
-mapAlg(map)
+
+const grid = (bar, gar) => {
+
+let goblar = []
+
+	for(let mar = 0; mar < bar; mar ++) {
+
+		let dar = ""
+
+		for(let flar = 0; flar < gar; flar ++) {
+
+			dar += "#"
+
+
+
+		}
+
+		goblar.push(dar)
+
+
+
+	}
+
+
+return goblar
+} 
+
+let mopler = grid(10, 10) 
+
+console.log(mopler)
+
+mapAlg(mopler)
