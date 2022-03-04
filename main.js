@@ -10,7 +10,7 @@ context.canvas.height = blocker;
 
 
 const wall = (x1, y1, w, h) => {
-	console.log("wall? maybe!", x1, y1, w, h)
+//	console.log("wall? maybe!", x1, y1, w, h)
 	context.beginPath();
 
 	context.fillStyle = "green"
@@ -26,13 +26,12 @@ const mapAlg = (map) => {
 	const numRows = map.length
 	const numCols = map[0].length // We assume all rows have same number of cols 
 	for(let bar = 0; bar < map.length; bar++) {
-/	console.log("aadadad", map[bar], "ooosa")/
+//	console.log("aadadad", map[bar], "ooosa")/
 
 
 		for (let gar = 0; gar < map[bar].length; gar ++) {
 
 			if (map[bar][gar] == "_") {
-				console.log("path")
 		
 			} 
 
@@ -117,8 +116,6 @@ if(coll + 2 < mazeMap[0].length) {
 	localNB.push( [row, coll + 2] )
 }
 
-console.log(localNB)
-
 return localNB
 
 
@@ -163,7 +160,7 @@ let isVis = (vis, row, coll) => {
 
       	if(vis[jorgan][0] == row && vis[jorgan][1] == coll) {
 
-        	console.log("visited!")
+        	console.log("Approached a visted space")
 
      		return true
 
@@ -177,6 +174,33 @@ let isVis = (vis, row, coll) => {
    	 return false
 }
 
+let insertPathInRow = (rowSTR, collInsert) => {
+
+	let slushie = ""
+
+	for(let melt = 0; melt < rowSTR.length; melt++) {
+
+		let soup = ""
+
+		if (melt == collInsert) {
+
+			soup += "_"
+
+		}
+
+		else {
+
+			soup += rowSTR[melt]
+
+		}
+
+		slushie += soup
+
+	}
+
+	return slushie
+
+}
 
 let delWallNB = (mazeMap, row1, coll1, row2, coll2) => {
 
@@ -185,15 +209,15 @@ let delWallNB = (mazeMap, row1, coll1, row2, coll2) => {
 	
 		if (coll1 - coll2 > 0) {
 
-			mazeMap[row1][coll1 - 1] = "_"
-
-			console.log("this is a test!")
+			mazeMap[row1] = insertPathInRow(mazeMap[row1], coll1 - 1)	
 
 		}
 
 		else {
 
-			mazeMap[row1][coll1 + 1] = "_"
+			mazeMap[row1] = insertPathInRow(mazeMap[row1], coll1 + 1)
+
+			console.log("a path has been created at", [row1], [coll1 + 1])
 
 		}
 
@@ -203,20 +227,30 @@ let delWallNB = (mazeMap, row1, coll1, row2, coll2) => {
 
 		if(row1 - row2 > 0) {
 
-			mazeMap[row1 - 1][coll1] = "_"
+			mazeMap[row1 - 1] = insertPathInRow(mazeMap[row1 - 1], coll1)
+
+			console.log("a path has been created at", [row1 - 1], [coll1])
 
 		}
 
 		else {
 
-			mazeMap[row1 + 1][coll1] = "_"
+
+
+			mazeMap[row1 + 1] = insertPathInRow(mazeMap[row1 + 1], coll1)
+
+			console.log("a path has been created at", [row1 + 1], [coll1])
 
 		}
 	}
 
-console.log("this mazeMap is good!")
 
-console.log(mazeMap)
+
+
+// console.log(mazeMap)
+
+	
+
 return mazeMap
 
 }
@@ -242,14 +276,14 @@ const mazeGen = (mazeMap, row, coll) => {
 
 			console.log(mazeMap)
 
-			console.log("found!")
+			console.log("mazeMap finsihed!")
 
 			mazeMap = mazeGen(mazeMap, shuffled[per][0], shuffled[per][1] )
 
 		}
 
 		else {
-			console.log("no soup for you")
+	//		console.log("No availible space")
 		}
 
 
@@ -273,9 +307,9 @@ const mazeGen = (mazeMap, row, coll) => {
 
 }
 
-let mopler = grid(10, 10) 
+let mopler = grid(20, 20) 
 
-console.log(mopler)
+// console.log(mopler)
 
 let finishedMaze = mazeGen(mopler, 0, 0)
 
@@ -296,8 +330,5 @@ mapAlg(finishedMaze)
 
 
 // TEST ZONE:
-
-let green = shuffleNB( [ [3, 4], [1, 2], [2, 2], [2, 23], [99999, 999999], [-32, -32] ] )
-console.log(green)
 
 
