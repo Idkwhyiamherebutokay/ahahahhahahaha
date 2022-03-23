@@ -22,6 +22,41 @@ const wall = (x1, y1, w, h) => {
 	context.fill();
 }
 
+
+const exit = (x1, y1, w, h) => {
+//	console.log("exit? YES!!", x1, y1, w, h)
+	context.beginPath();
+
+	context.fillStyle = "red"
+
+
+	context.rect(x1, y1, w, h);
+
+	context.stroke();
+	context.fill();
+}
+
+var clearCircle = function(x, y, radius)
+{
+    context.beginPath();
+    context.arc(x, y, radius, 0, 2 * Math.PI, false);
+    context.clip();
+    context.clearRect(x - radius - 1, y - radius - 1,
+                      radius * 2 + 2, radius * 2 + 2);
+};
+
+const playerDraw = (x1, y1, rad) => {
+
+	context.beginPath();
+
+	context.fillStyle = "purple"
+
+	context.arc(x1, y1, rad, 0, 2 * Math.PI)
+
+	context.fill()
+
+};
+
 const mapAlg = (map) => {
 	const numRows = map.length
 	const numCols = map[0].length // We assume all rows have same number of cols 
@@ -60,7 +95,7 @@ const grid = (bar, gar) => {
 			for(let flar = 0; flar < gar; flar ++) {
 
 
-				if (flar%2 == 0 && mar%2 == 0) {
+				if (flar%2 == 1 && mar%2 == 1) {
 
 					dar += "_"
 
@@ -90,7 +125,7 @@ const grid = (bar, gar) => {
 	return goblar
 } 
 
-let visited = []
+let visited = {}
 
 const locateNB = (mazeMap, row, coll) => {
 
@@ -99,12 +134,12 @@ const locateNB = (mazeMap, row, coll) => {
 
 let localNB = []
 
-if(row - 2 >= 0) {
+if(row - 2 > 0) {
 	localNB.push( [row - 2, coll] )
 
 }
 
-if(coll - 2 >= 0) {
+if(coll - 2 > 0) {
 	localNB.push( [row, coll - 2] )
 }
 
@@ -155,23 +190,19 @@ let shuffleNB = (NBlist) => {
  
 let isVis = (vis, row, coll) => {
 
- 	for(let jorgan = 0; jorgan < vis.length; jorgan ++) {
 
 
-      	if(vis[jorgan][0] == row && vis[jorgan][1] == coll) {
+	let reVis = vis[`${row}:${coll}`]
 
-        	console.log("Approached a visted space")
+	if(reVis == true) {
+		return true
+	}
 
-     		return true
-
-     	 }
-
-
+	else {
+		return false
+	}
 
 
-   	 }
-
-   	 return false
 }
 
 let insertPathInRow = (rowSTR, collInsert) => {
@@ -258,7 +289,8 @@ return mazeMap
 
 const mazeGen = (mazeMap, row, coll) => {
 	
-	visited.push([row, coll])
+	// row = 1 col =4 -> "1:4"
+	visited[`${row}:${coll}`] = true
 
 	let NBlist = locateNB(mazeMap, row, coll)
 
@@ -270,11 +302,11 @@ const mazeGen = (mazeMap, row, coll) => {
 
 			mazeMap = delWallNB(mazeMap, row, coll, shuffled[per][0], shuffled[per][1])
 
-			context.clearRect(0, 0, canvas.width, canvas.height);
+	//		context.clearRect(0, 0, canvas.width, canvas.height);
 
-			mapAlg(mazeMap)
+	//  	mapAlg(mazeMap)
 
-			console.log(mazeMap)
+			// console.log(mazeMap)
 
 			console.log("mazeMap finsihed!")
 
@@ -307,17 +339,146 @@ const mazeGen = (mazeMap, row, coll) => {
 
 }
 
-let mopler = grid(20, 20) 
+let mopler
 
-// console.log(mopler)
+let finishedMaze
 
-let finishedMaze = mazeGen(mopler, 0, 0)
+let borgo
+
+let morgo
+
+const prestigeMaze = (rows, colls) => {
+
+	visited = {}
+
+	context.clearRect(0, 0, canvas.width, canvas.height);
+
+	mopler = grid(rows, colls) 
+
+	// console.log(mopler)
+
+	finishedMaze = mazeGen(mopler, 1, 1)
 
 
-mapAlg(finishedMaze)
+	console.log(finishedMaze)
 
 
 
+	borgo = randomRange(0, mopler.length - 1)
+
+
+
+	morgo = randomRange(0, mopler.length - 1)
+
+	console.log(borgo, morgo)
+
+	if(borgo%2 == 0) {
+
+		borgo += 1
+
+	}
+
+	if(morgo%2 == 0) {
+
+		morgo += 1
+
+	}
+
+
+	exit(context.canvas.width/mopler[0].length * morgo, context.canvas.height/mopler.length * borgo, context.canvas.width/mopler[0].length, context.canvas.height/mopler.length)
+
+	mapAlg(finishedMaze)
+
+	player.currentCol = 1 //change to start if needed (random starts, etc)
+
+	player.currentRow = 1
+
+
+}
+
+
+
+
+let movePlayer = (moveSpeed, grid, player, newRow, newCol) => {
+
+
+	if(grid[newRow][newCol] == "#") {
+		console.log("cannot move into a wall at", newRow, newCol)
+		return
+	}
+
+	else {
+
+		var radius = (context.canvas.width/mopler[0].length)/2
+
+		// clearCircle(context.canvas.width/mopler[0].length * player.currentCol + radius, context.canvas.height/mopler.length * player.currentRow + radius, radius)
+
+		player.currentRow = newRow
+
+		player.currentCol = newCol
+
+		playerDraw(context.canvas.width/mopler[0].length * player.currentCol + radius, context.canvas.height/mopler.length * player.currentRow + radius, radius)
+
+		console.log("sucsessfully moved to", player.currentRow, player.currentCol)
+
+		if(player.currentRow == borgo && player.currentCol == morgo) {
+
+			if (confirm("Nice job, play again? Y/N?")) {
+
+
+				prestigeMaze(grid[0].length + 10, grid[0].length + 10)
+
+
+
+			}
+
+		}
+
+	}
+
+
+}
+
+let checkKey = (e) => {
+
+    e = e || window.event;
+
+    if (e.keyCode == '38') {
+
+
+    	movePlayer(player.moveSpeed, finishedMaze, player, player.currentRow - 1, player.currentCol)
+
+    	
+
+
+    }
+    else if (e.keyCode == '40') {
+        movePlayer(player.moveSpeed, finishedMaze, player, player.currentRow + 1, player.currentCol)
+    }
+    else if (e.keyCode == '37') {
+        movePlayer(player.moveSpeed, finishedMaze, player, player.currentRow, player.currentCol - 1)
+    }
+    else if (e.keyCode == '39') {
+        movePlayer(player.moveSpeed, finishedMaze, player, player.currentRow, player.currentCol + 1)
+    }
+
+}
+
+document.onkeydown = checkKey;
+
+let player = {
+
+	currentRow: 1,
+
+	currentCol: 1,
+
+	moveSpeed: 1
+
+}
+
+prestigeMaze(11,11)
+
+//prestigeMaze(11, 11)
 
 // 0/2 = 0 R 0
 // 1/2 = 0 R 1
