@@ -1,5 +1,10 @@
 
 
+// Piroity list
+
+// 1. Monsters, 2. maze scaling, 3. sprites, 4. camera rework
+
+
 var canvas = document.querySelector('canvas');
 var context = canvas.getContext('2d');
 
@@ -10,7 +15,7 @@ context.canvas.height = blocker;
 
 
 const wall = (x1, y1, w, h) => {
-//	console.log("wall? maybe!", x1, y1, w, h)
+//	//("wall? maybe!", x1, y1, w, h)
 	context.beginPath();
 
 	context.fillStyle = "green"
@@ -23,8 +28,9 @@ const wall = (x1, y1, w, h) => {
 }
 
 
+
 const exit = (x1, y1, w, h) => {
-//	console.log("exit? YES!!", x1, y1, w, h)
+//	//("exit? YES!!", x1, y1, w, h)
 	context.beginPath();
 
 	context.fillStyle = "red"
@@ -57,11 +63,25 @@ const playerDraw = (x1, y1, rad) => {
 
 };
 
+const monDraw = (x1, y1, rad) => {
+
+	context.beginPath();
+
+	context.fillStyle = "orange"
+
+	context.arc(x1, y1, rad, 0, 2 * Math.PI)
+
+	context.fill()
+
+};
+
+
+
 const mapAlg = (map) => {
 	const numRows = map.length
 	const numCols = map[0].length // We assume all rows have same number of cols 
 	for(let bar = 0; bar < map.length; bar++) {
-//	console.log("aadadad", map[bar], "ooosa")/
+//	//("aadadad", map[bar], "ooosa")/
 
 
 		for (let gar = 0; gar < map[bar].length; gar ++) {
@@ -248,7 +268,7 @@ let delWallNB = (mazeMap, row1, coll1, row2, coll2) => {
 
 			mazeMap[row1] = insertPathInRow(mazeMap[row1], coll1 + 1)
 
-			console.log("a path has been created at", [row1], [coll1 + 1])
+			//("a path has been created at", [row1], [coll1 + 1])
 
 		}
 
@@ -260,7 +280,7 @@ let delWallNB = (mazeMap, row1, coll1, row2, coll2) => {
 
 			mazeMap[row1 - 1] = insertPathInRow(mazeMap[row1 - 1], coll1)
 
-			console.log("a path has been created at", [row1 - 1], [coll1])
+			//("a path has been created at", [row1 - 1], [coll1])
 
 		}
 
@@ -270,7 +290,7 @@ let delWallNB = (mazeMap, row1, coll1, row2, coll2) => {
 
 			mazeMap[row1 + 1] = insertPathInRow(mazeMap[row1 + 1], coll1)
 
-			console.log("a path has been created at", [row1 + 1], [coll1])
+			//("a path has been created at", [row1 + 1], [coll1])
 
 		}
 	}
@@ -278,7 +298,7 @@ let delWallNB = (mazeMap, row1, coll1, row2, coll2) => {
 
 
 
-// console.log(mazeMap)
+// //(mazeMap)
 
 	
 
@@ -302,20 +322,20 @@ const mazeGen = (mazeMap, row, coll) => {
 
 			mazeMap = delWallNB(mazeMap, row, coll, shuffled[per][0], shuffled[per][1])
 
-	//		context.clearRect(0, 0, canvas.width, canvas.height);
+	//		
 
 	//  	mapAlg(mazeMap)
 
-			// console.log(mazeMap)
+			// //(mazeMap)
 
-			console.log("mazeMap finsihed!")
+			//("mazeMap finsihed!")
 
 			mazeMap = mazeGen(mazeMap, shuffled[per][0], shuffled[per][1] )
 
 		}
 
 		else {
-	//		console.log("No availible space")
+	//		//("No availible space")
 		}
 
 
@@ -339,38 +359,106 @@ const mazeGen = (mazeMap, row, coll) => {
 
 }
 
-let mopler
+const wallDeGen =  (removePercent, map) => {
 
-let finishedMaze
+	let wallList = []
 
-let borgo
+	let nullList = []
 
-let morgo
+	for(let rower = 1; rower < map.length - 1; rower ++) {
+
+		for(let caller = 1; caller < map[0].length - 1 ; caller++ ) {
+
+			if(map[rower][caller] == "#") {
+
+				wallList.push([rower, caller]) 
+
+
+			}
+		}
+	}
+
+	let precent = (wallList.length * removePercent)
+
+		console.log(wallList)
+
+	let shuffledWall = shuffleNB(wallList)
+
+		console.log(shuffledWall)
+
+	for(let calanderYear = 0; calanderYear < precent; calanderYear ++) {
+
+		map[shuffledWall[calanderYear][0]] = insertPathInRow(map[shuffledWall[calanderYear][0]], shuffledWall[calanderYear][1])
+
+		console.log(map[shuffledWall[calanderYear][0]][shuffledWall[calanderYear][1]])
+
+	}
+
+	return map
+
+
+	//let listCreator = math.random(0, NB LIST.length)
+	//let nullSpaces
+
+
+
+}
+
+
+let genPosArea = (x1, y1, w, h) => {
+
+
+	borgo = randomRange(x1, w)
+
+
+	morgo = randomRange(y1, h)
+
+
+	if(borgo%2 == 0) {
+
+		borgo += 1
+
+	}
+
+
+	if(morgo%2 == 0) {
+
+		morgo += 1
+
+	}
+
+
+	morgo
+
+}
+
 
 const prestigeMaze = (rows, colls) => {
+
+
+	gameState.amountRow = rows
+
+	gameState.amountCol = colls
+
+	console.log("prestigeMaze")
 
 	visited = {}
 
 	context.clearRect(0, 0, canvas.width, canvas.height);
 
-	mopler = grid(rows, colls) 
+	let mopler = grid(rows, colls) 
 
-	// console.log(mopler)
+	// //(mopler)
 
-	finishedMaze = mazeGen(mopler, 1, 1)
+	gameState.finishedMaze = mazeGen(mopler, 1, 1)
 
-
-	console.log(finishedMaze)
+	gameState.finishedMaze = wallDeGen(0.2, gameState.finishedMaze)
 
 
 
 	borgo = randomRange(0, mopler.length - 1)
 
-
-
 	morgo = randomRange(0, mopler.length - 1)
-
-	console.log(borgo, morgo)
 
 	if(borgo%2 == 0) {
 
@@ -385,21 +473,87 @@ const prestigeMaze = (rows, colls) => {
 	}
 
 
-	exit(context.canvas.width/mopler[0].length * morgo, context.canvas.height/mopler.length * borgo, context.canvas.width/mopler[0].length, context.canvas.height/mopler.length)
+	gameState.player.currentRow = 1
 
-	mapAlg(finishedMaze)
+	gameState.player.currentCol = 1
 
-	player.currentCol = 1 //change to start if needed (random starts, etc)
 
-	player.currentRow = 1
+	gameState.exitCol = morgo
 
+	gameState.exitRow = borgo
+
+
+
+
+
+
+	renderFrame(gameState)
 
 }
 
 
+let drawPlayer = (gameState) => {
 
 
-let movePlayer = (moveSpeed, grid, player, newRow, newCol) => {
+
+}
+
+let moveMonster = (gameState) => { 
+
+	let preMonChoice = locateNB(gameState.finishedMaze, gameState.monster.currentRow, gameState.monster.currentCol)
+
+	let monChoice = preMonChoice.filter((i, nb) => {
+		// if nb meets some condition, return true
+		// else return false
+
+		console.log(nb)
+
+		const row = i[0]
+
+		const col = i[1]
+
+		if(gameState.finishedMaze[row][col] == "#") {
+
+			return false
+
+
+
+		}
+
+		else {return true}
+
+	})
+
+	if (gameState.monster.currentState == 0) {
+
+		let monChosen = shuffleNB(monChoice)
+
+		gameState.monster.currentCol = monChosen[0][0]
+
+		gameState.monster.currentRow = monChosen[0][1]
+
+		return gameState.monster
+
+	}
+
+	else if (gameState.monster == 1) {
+
+	}
+
+	else if (gameState.monster == 2) {
+
+	}
+
+	else {console.log("invalid monster state", gameState.monster.state)}
+
+}
+
+
+let movePlayer = (moveSpeed, grid, player, newRow, newCol) => { 
+
+
+
+
 
 
 	if(grid[newRow][newCol] == "#") {
@@ -409,21 +563,25 @@ let movePlayer = (moveSpeed, grid, player, newRow, newCol) => {
 
 	else {
 
-		var radius = (context.canvas.width/mopler[0].length)/2
-
 		// clearCircle(context.canvas.width/mopler[0].length * player.currentCol + radius, context.canvas.height/mopler.length * player.currentRow + radius, radius)
 
 		player.currentRow = newRow
 
 		player.currentCol = newCol
 
-		playerDraw(context.canvas.width/mopler[0].length * player.currentCol + radius, context.canvas.height/mopler.length * player.currentRow + radius, radius)
+		renderFrame(gameState)
 
 		console.log("sucsessfully moved to", player.currentRow, player.currentCol)
 
 		if(player.currentRow == borgo && player.currentCol == morgo) {
 
+
 			if (confirm("Nice job, play again? Y/N?")) {
+
+				renderFrame(gameState)
+
+
+				console.log("yes")
 
 
 				prestigeMaze(grid[0].length + 10, grid[0].length + 10)
@@ -440,6 +598,12 @@ let movePlayer = (moveSpeed, grid, player, newRow, newCol) => {
 }
 
 let checkKey = (e) => {
+
+	let finishedMaze = gameState.finishedMaze
+
+
+
+	let player = gameState.player
 
     e = e || window.event;
 
@@ -466,17 +630,118 @@ let checkKey = (e) => {
 
 document.onkeydown = checkKey;
 
-let player = {
 
-	currentRow: 1,
 
-	currentCol: 1,
 
-	moveSpeed: 1
+let gameState = {
+
+	amountRow: 11,
+
+	amountCol: 11,
+
+	exitRow: 10,
+
+	exitCol: 10,
+
+	player: {
+
+		currentRow: 1,
+
+		currentCol: 1,
+
+		moveSpeed: 1
+
+	},
+
+
+	monster: {
+
+		type: "t", 
+
+		currentState: 0, //0: idle(random), 1: hunt(greedyBest), 2: seek(randomChase)
+
+		speed: 1,
+
+		power: 1, 
+
+		idleType: "random", //0: random,
+
+		huntType: "greedyBest", //1: greedyBest,
+
+		seekType: "randomChase", //2: randomChase,
+
+		currentCol: 1,
+
+		currentRow: 1
+
+	}
+
+
 
 }
 
-prestigeMaze(11,11)
+
+
+let renderFrame = (gameState) => {
+
+	var radius = (context.canvas.width/gameState.amountCol)/2
+
+	context.clearRect(0, 0, canvas.width, canvas.height);
+
+	exit(context.canvas.width/gameState.amountCol * gameState.exitCol, context.canvas.height/gameState.amountRow * gameState.exitRow, context.canvas.width/gameState.amountCol, context.canvas.height/gameState.amountRow)
+
+	playerDraw(context.canvas.width/gameState.amountRow * gameState.player.currentCol + radius, context.canvas.height/gameState.amountRow * gameState.player.currentRow + radius, radius)
+
+	monDraw(context.canvas.width/gameState.amountRow * gameState.monster.currentCol + radius, context.canvas.height/gameState.amountRow * gameState.monster.currentRow + radius, radius)
+
+	mapAlg(gameState.finishedMaze)
+
+}
+
+
+prestigeMaze(gameState.amountRow,gameState.amountCol)
+
+console.log("TEST")
+
+let update = (progress) => {
+  // Update the state of the world for the elapsed time since last render
+  console.log("the update was sucsessful")
+
+  if(!gameState.finishedMaze) {
+  	return
+  }
+  else {
+  	moveMonster(gameState) }
+}
+
+let loop = (timestamp) => {
+
+  	var progress = timestamp - lastRender
+
+	update(progress)
+
+	renderFrame(gameState)
+
+
+
+ 	setTimeout(function() {
+
+ 		lastRender = timestamp
+		window.requestAnimationFrame(loop)
+	
+	}, 100);
+}
+var lastRender = 0
+window.requestAnimationFrame(loop)
+
+
+
+
+
+
+
+
+
 
 //prestigeMaze(11, 11)
 
