@@ -481,7 +481,7 @@ const prestigeMaze = (rows, colls) => {
 
 	gameState.finishedMaze = mazeGen(mopler, 1, 1)
 
-	gameState.finishedMaze = wallDeGen(0.2, gameState.finishedMaze)
+	gameState.finishedMaze = wallDeGen(0.1, gameState.finishedMaze)
 
 
 
@@ -500,6 +500,10 @@ const prestigeMaze = (rows, colls) => {
 		morgo += 1
 
 	}
+
+	gameState.monster.currentRow = borgo
+
+	gameState.monster.currentCol = morgo
 
 
 	gameState.player.currentRow = 1
@@ -679,7 +683,7 @@ let movePlayer = (moveSpeed, grid, player, newRow, newCol) => {
 		if(player.currentRow == borgo && player.currentCol == morgo) {
 
 
-			if (confirm("Nice job, play again? Y/N?")) {
+			if (confirm("Nice job, next level? Y/N?")) {
 
 				renderFrame(gameState)
 
@@ -692,6 +696,36 @@ let movePlayer = (moveSpeed, grid, player, newRow, newCol) => {
 
 
 			}
+
+			else {
+
+
+
+
+
+			}
+
+		}
+
+		else if(player.currentRow == gameState.monster.currentRow && player.currentCol == gameState.monster.currentCol) {
+
+					if (confirm("Bad Job, play again? Y/N?")) {
+
+						renderFrame(gameState)
+
+
+						console.log("yes")
+
+
+						prestigeMaze(11, 11)
+
+
+
+					}
+
+					else{
+
+					}
 
 		}
 
@@ -733,7 +767,47 @@ let checkKey = (e) => {
 
 document.onkeydown = checkKey;
 
+//monster zone
 
+class troglobite {
+  constructor() {
+
+    this.type = "t";
+
+    this.speed = 1;
+
+    this.respectsWalls = true; //interacts with walls
+
+    this.currentState = 0; //0: idle(random), 1: hunt(greedyBest), 2: seek(randomChase)
+
+    this.reluctance = 1; //Determines how many spaces back the monster won't go
+
+    this.moveHistory = [];
+
+    this.FR = 10 //10 is defult testing speed, WHOOP
+
+    this.FRcounter = 0;
+
+    this.power = 1;
+
+    this.idleType = "random"; //0: random,
+
+    this.huntType = "greedyBest"; //1: greedyBest,
+
+    this.seekType = "randomChase"; //2: randomChase,
+
+    this.difficulty = "basic";
+
+    this.currentCol = 0;
+
+    this.currentRow = 0;
+
+
+  }
+}
+
+
+//end of monster zone
 
 
 let gameState = {
@@ -756,42 +830,20 @@ let gameState = {
 
 	},
 
+	evil: { //controls evil/monster spawning
 
-	monster: {
+		evil: 0,
 
-		type: "t", 
+	},
 
-		currentState: 0, //0: idle(random), 1: hunt(greedyBest), 2: seek(randomChase)
+	//allMonster: [
 
-		speed: 1,
+		monster: new troglobite()
 
-		respectsWalls: true,
-
-		reluctance: 1, //Determines how many spaces back the monster won't go
-
-		moveHistory: [],
-
-		FR: 1, //10 is defult testing speed, WHOOP
-
-		FRcounter: 0,
-
-		power: 1, 
-
-		idleType: "random", //0: random,
-
-		huntType: "greedyBest", //1: greedyBest,
-
-		seekType: "randomChase", //2: randomChase,
-
-		currentCol: 1,
-
-		currentRow: 1
-
-	}
-
-
+	//]
 
 }
+
 
 
 
@@ -841,6 +893,33 @@ let update = (progress) => {
 		else {
 
 			gameState.monster.FRcounter += 1
+
+			if (gameState.monster.currentCol == gameState.player.currentCol && gameState.monster.currentRow == gameState.player.currentRow) {
+
+					console.log("dead")
+
+
+				if (confirm("Bad Job, play again? Y/N?")) {
+
+					renderFrame(gameState)
+
+
+					console.log("yes")
+
+
+					prestigeMaze(11, 11)
+
+
+
+				}
+
+				else {
+
+					console.log("beef")
+
+				}
+
+			}
 
 		}
 
