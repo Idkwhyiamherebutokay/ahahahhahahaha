@@ -147,6 +147,35 @@ const grid = (bar, gar) => {
 
 let visited = {}
 
+const locateMonsterNB = (mazeMap, row, coll) => {
+
+// let localNB = [[wor + 2, lloc], [wor, lloc + 2], [wor - 2, lloc], [wor, lloc -2] ] 
+
+
+let localNB = []
+
+if(row - 1 > 0) {
+	localNB.push( [row - 1, coll] )
+
+}
+
+if(coll - 1 > 0) {
+	localNB.push( [row, coll - 1] )
+}
+
+if(row + 1 < mazeMap.length) {
+	localNB.push( [row + 1, coll] )
+}
+
+if(coll + 1 < mazeMap[0].length) {
+	localNB.push( [row, coll + 1] )
+}
+
+return localNB
+
+
+}
+
 const locateNB = (mazeMap, row, coll) => {
 
 // let localNB = [[wor + 2, lloc], [wor, lloc + 2], [wor - 2, lloc], [wor, lloc -2] ] 
@@ -182,11 +211,11 @@ let randomRange = (min, max) => {
 
 }
 
-let shuffleNB = (NBlist) => {
+let shuffleNB = (NBlist) => { 
 
 	for(let i = NBlist.length - 1; i >= 0; i--) {
 
-		let j = randomRange(0, i)
+		let j = randomRange(0, i + 1)
 
 		let tmp = [NBlist[i][0], NBlist[i][1]]
 
@@ -208,7 +237,7 @@ let shuffleNB = (NBlist) => {
 
 
  
-let isVis = (vis, row, coll) => {
+let isVis = (vis, row, coll) => { //vis, row, col
 
 
 
@@ -380,7 +409,7 @@ const wallDeGen =  (removePercent, map) => {
 
 	let precent = (wallList.length * removePercent)
 
-		console.log(wallList)
+		//console.log(wallList)
 
 	let shuffledWall = shuffleNB(wallList)
 
@@ -500,47 +529,121 @@ let drawPlayer = (gameState) => {
 
 let moveMonster = (gameState) => { 
 
-	let preMonChoice = locateNB(gameState.finishedMaze, gameState.monster.currentRow, gameState.monster.currentCol)
+	let preMonChoice = locateMonsterNB(gameState.finishedMaze, gameState.monster.currentRow, gameState.monster.currentCol)
+
+	//	console.log("PMC", preMonChoice)
 
 	let monChoice = preMonChoice.filter((i, nb) => {
 		// if nb meets some condition, return true
 		// else return false
 
-		console.log(nb)
+		const col = i[0]
 
-		const row = i[0]
+		const row = i[1]
 
-		const col = i[1]
 
-		if(gameState.finishedMaze[row][col] == "#") {
+		if(gameState.finishedMaze[col][row] == "#") {
 
 			return false
 
+		}
 
+		
+		else {
+
+	//		console.log("true")
+
+	//		console.log("row", row)
+
+	//  	console.log("col", col)
+
+			return true
 
 		}
 
-		else {return true}
 
-	})
+	}	
+
+	)
 
 	if (gameState.monster.currentState == 0) {
 
 		let monChosen = shuffleNB(monChoice)
 
-		gameState.monster.currentCol = monChosen[0][0]
+		console.log("monChosen", monChosen)
 
-		gameState.monster.currentRow = monChosen[0][1]
+		console.log(gameState.monster.currentCol, "monster currentCol")
 
-		return gameState.monster
+		console.log(gameState.monster.currentRow, "monster currentRow")
+
+		console.log("moveHistory 1", JSON.stringify(gameState.monster.moveHistory))
+
+		let bog = 0
+
+		for(let bog = 0;bog < monChosen.length; bog++) {
+
+			if(!gameState.monster.moveHistory.includes(`${monChosen[bog][0]}:${monChosen[bog][1]}`) && monChosen.length > 1) {
+
+
+				gameState.monster.moveHistory.push(`${gameState.monster.currentRow}:${gameState.monster.currentCol}`)
+
+				gameState.monster.currentCol = monChosen[bog][1]
+
+				gameState.monster.currentRow = monChosen[bog][0]
+
+
+
+				if(gameState.monster.moveHistory.length > gameState.monster.reluctance) {
+
+					gameState.monster.moveHistory = gameState.monster.moveHistory.slice(1)
+
+					console.log("shifted")
+
+
+				}
+
+	            console.log("moveHistory 2", JSON.stringify(gameState.monster.moveHistory))
+
+	       
+
+				return gameState.monster
+
+			}
+
+			else if (monChosen.length == 1) {
+
+				gameState.monster.moveHistory.push(`${gameState.monster.currentRow}:${gameState.monster.currentCol}`)
+
+				gameState.monster.currentCol = monChosen[bog][1]
+
+				gameState.monster.currentRow = monChosen[bog][0]
+
+					if(gameState.monster.moveHistory.length > gameState.monster.reluctance) {
+
+						gameState.monster.moveHistory = gameState.monster.moveHistory.slice(1)
+
+						console.log("shifted")
+						
+					}
+
+				console.log("moveHistory 3", JSON.stringify(gameState.monster.moveHistory))
+
+				return gameState.monster
+
+
+			}
+
 
 	}
 
-	else if (gameState.monster == 1) {
 
 	}
 
-	else if (gameState.monster == 2) {
+	else if (gameState.monster == 1) { //hunt
+
+	}
+
+	else if (gameState.monster == 2) { //seek
 
 	}
 
@@ -662,6 +765,16 @@ let gameState = {
 
 		speed: 1,
 
+		respectsWalls: true,
+
+		reluctance: 1, //Determines how many spaces back the monster won't go
+
+		moveHistory: [],
+
+		FR: 1, //10 is defult testing speed, WHOOP
+
+		FRcounter: 0,
+
 		power: 1, 
 
 		idleType: "random", //0: random,
@@ -703,26 +816,48 @@ prestigeMaze(gameState.amountRow,gameState.amountCol)
 
 console.log("TEST")
 
+
 let update = (progress) => {
   // Update the state of the world for the elapsed time since last render
   console.log("the update was sucsessful")
 
-  if(!gameState.finishedMaze) {
-  	return
-  }
-  else {
-  	moveMonster(gameState) }
+
+
+
+	if(!gameState.finishedMaze) {
+		return
+  	}
+
+	else {
+
+		if(gameState.monster.FRcounter == gameState.monster.FR) {
+
+			moveMonster(gameState) 
+
+			gameState.monster.FRcounter = 0
+
+		}
+
+		else {
+
+			gameState.monster.FRcounter += 1
+
+		}
+
+	}
+
+  		
+  	
 }
 
 let loop = (timestamp) => {
+
 
   	var progress = timestamp - lastRender
 
 	update(progress)
 
 	renderFrame(gameState)
-
-
 
  	setTimeout(function() {
 
