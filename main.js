@@ -2,7 +2,7 @@
 
 // Piroity list
 
-// 1. Monsters, 2. maze scaling, 3. sprites, 4. camera rework
+// 1. Monsters (spawning, relectance/hunting mode, types), 2. sprites, 3. camera rework
 
 
 var canvas = document.querySelector('canvas');
@@ -12,6 +12,42 @@ let blocker = Math.min(window.innerHeight, window.innerWidth)
 
 context.canvas.width  = blocker;
 context.canvas.height = blocker;
+
+let monsterSets = {
+
+	set0:{
+
+		minLevel: 0,
+
+		mustSpawn: [],
+
+		spawnlist: [troglobite]
+
+		},
+
+	set1:{
+
+		minLevel: 1,
+
+		mustSpawn: [],
+
+		spawnlist: [troglobite]
+
+		},
+
+		setBoss:{
+
+		minLevel: 2,
+
+		mustSpawn: [troglobite],
+
+		spawnlist: [troglobite]
+
+		}
+
+}
+
+
 
 
 const wall = (x1, y1, w, h) => {
@@ -501,9 +537,12 @@ const prestigeMaze = (rows, colls) => {
 
 	}
 
-	gameState.monster.currentRow = borgo
+	for(let m = 0; m < gameState.activeMonsters.length; m ++) { //fix! bandaid!
 
-	gameState.monster.currentCol = morgo
+		gameState.activeMonsters[m].currentRow = borgo
+
+		gameState.activeMonsters[m].currentCol = morgo
+	}
 
 
 	gameState.player.currentRow = 1
@@ -531,9 +570,9 @@ let drawPlayer = (gameState) => {
 
 }
 
-let moveMonster = (gameState) => { 
+let moveMonster = (gameState, monster) => { 
 
-	let preMonChoice = locateMonsterNB(gameState.finishedMaze, gameState.monster.currentRow, gameState.monster.currentCol)
+	let preMonChoice = locateMonsterNB(gameState.finishedMaze, monster.currentRow, monster.currentCol)
 
 	//	console.log("PMC", preMonChoice)
 
@@ -570,69 +609,69 @@ let moveMonster = (gameState) => {
 
 	)
 
-	if (gameState.monster.currentState == 0) {
+	if (monster.currentState == 0) {
 
 		let monChosen = shuffleNB(monChoice)
 
 		console.log("monChosen", monChosen)
 
-		console.log(gameState.monster.currentCol, "monster currentCol")
+		console.log(monster.currentCol, "monster currentCol")
 
-		console.log(gameState.monster.currentRow, "monster currentRow")
+		console.log(monster.currentRow, "monster currentRow")
 
-		console.log("moveHistory 1", JSON.stringify(gameState.monster.moveHistory))
+		console.log("moveHistory 1", JSON.stringify(monster.moveHistory))
 
 		let bog = 0
 
 		for(let bog = 0;bog < monChosen.length; bog++) {
 
-			if(!gameState.monster.moveHistory.includes(`${monChosen[bog][0]}:${monChosen[bog][1]}`) && monChosen.length > 1) {
+			if(!monster.moveHistory.includes(`${monChosen[bog][0]}:${monChosen[bog][1]}`) && monChosen.length > 1) {
 
 
-				gameState.monster.moveHistory.push(`${gameState.monster.currentRow}:${gameState.monster.currentCol}`)
+				monster.moveHistory.push(`${monster.currentRow}:${monster.currentCol}`)
 
-				gameState.monster.currentCol = monChosen[bog][1]
+				monster.currentCol = monChosen[bog][1]
 
-				gameState.monster.currentRow = monChosen[bog][0]
+				monster.currentRow = monChosen[bog][0]
 
 
 
-				if(gameState.monster.moveHistory.length > gameState.monster.reluctance) {
+				if(monster.moveHistory.length > monster.reluctance) {
 
-					gameState.monster.moveHistory = gameState.monster.moveHistory.slice(1)
+					monster.moveHistory = monster.moveHistory.slice(1)
 
 					console.log("shifted")
 
 
 				}
 
-	            console.log("moveHistory 2", JSON.stringify(gameState.monster.moveHistory))
+	            console.log("moveHistory 2", JSON.stringify(monster.moveHistory))
 
 	       
 
-				return gameState.monster
+				return monster
 
 			}
 
 			else if (monChosen.length == 1) {
 
-				gameState.monster.moveHistory.push(`${gameState.monster.currentRow}:${gameState.monster.currentCol}`)
+				monster.moveHistory.push(`${monster.currentRow}:${monster.currentCol}`)
 
-				gameState.monster.currentCol = monChosen[bog][1]
+				monster.currentCol = monChosen[bog][1]
 
-				gameState.monster.currentRow = monChosen[bog][0]
+				monster.currentRow = monChosen[bog][0]
 
-					if(gameState.monster.moveHistory.length > gameState.monster.reluctance) {
+					if(monster.moveHistory.length > monster.reluctance) {
 
-						gameState.monster.moveHistory = gameState.monster.moveHistory.slice(1)
+						monster.moveHistory = monster.moveHistory.slice(1)
 
 						console.log("shifted")
 						
 					}
 
-				console.log("moveHistory 3", JSON.stringify(gameState.monster.moveHistory))
+				console.log("moveHistory 3", JSON.stringify(monster.moveHistory))
 
-				return gameState.monster
+				return monster
 
 
 			}
@@ -643,15 +682,15 @@ let moveMonster = (gameState) => {
 
 	}
 
-	else if (gameState.monster == 1) { //hunt
+	else if (monster == 1) { //hunt
 
 	}
 
-	else if (gameState.monster == 2) { //seek
+	else if (monster == 2) { //seek
 
 	}
 
-	else {console.log("invalid monster state", gameState.monster.state)}
+	else {console.log("invalid monster state", monster.state)}
 
 }
 
@@ -691,6 +730,9 @@ let movePlayer = (moveSpeed, grid, player, newRow, newCol) => {
 				console.log("yes")
 
 
+				gameState.level ++ 
+
+
 				prestigeMaze(grid[0].length + 10, grid[0].length + 10)
 
 
@@ -707,25 +749,29 @@ let movePlayer = (moveSpeed, grid, player, newRow, newCol) => {
 
 		}
 
-		else if(player.currentRow == gameState.monster.currentRow && player.currentCol == gameState.monster.currentCol) {
+		for(let m = 0; m < gameState.activeMonsters.length; m ++){
 
-					if (confirm("Bad Job, play again? Y/N?")) {
+			if(player.currentRow == gameState.activeMonsters[m].currentRow && player.currentCol == gameState.activeMonsters[m].currentCol) {
 
-						renderFrame(gameState)
+						if (confirm("Bad Job, play again? Y/N?")) {
 
-
-						console.log("yes")
-
-
-						prestigeMaze(11, 11)
+							renderFrame(gameState)
 
 
+							console.log("yes")
 
-					}
 
-					else{
+							prestigeMaze(11, 11)
 
-					}
+
+
+						}
+
+						else{
+
+						}
+
+			}
 
 		}
 
@@ -820,6 +866,8 @@ let gameState = {
 
 	exitCol: 10,
 
+	level: 0,
+
 	player: {
 
 		currentRow: 1,
@@ -836,11 +884,13 @@ let gameState = {
 
 	},
 
-	//allMonster: [
+	activeMonsters: [
 
-		monster: new troglobite()
+		new troglobite(),
 
-	//]
+		new troglobite(),
+
+	]
 
 }
 
@@ -857,7 +907,11 @@ let renderFrame = (gameState) => {
 
 	playerDraw(context.canvas.width/gameState.amountRow * gameState.player.currentCol + radius, context.canvas.height/gameState.amountRow * gameState.player.currentRow + radius, radius)
 
-	monDraw(context.canvas.width/gameState.amountRow * gameState.monster.currentCol + radius, context.canvas.height/gameState.amountRow * gameState.monster.currentRow + radius, radius)
+	for(let m = 0; m < gameState.activeMonsters.length; m++) {
+
+		monDraw(context.canvas.width/gameState.amountRow * gameState.activeMonsters[m].currentCol + radius, context.canvas.height/gameState.amountRow * gameState.activeMonsters[m].currentRow + radius, radius)
+
+	}
 
 	mapAlg(gameState.finishedMaze)
 
@@ -882,40 +936,46 @@ let update = (progress) => {
 
 	else {
 
-		if(gameState.monster.FRcounter == gameState.monster.FR) {
+		for(let m = 0; m < gameState.activeMonsters.length; m ++) {
 
-			moveMonster(gameState) 
+				if(gameState.activeMonsters[m].FRcounter == gameState.activeMonsters[m].FR) {
 
-			gameState.monster.FRcounter = 0
+					moveMonster(gameState, gameState.activeMonsters[m]) 
 
-		}
+					gameState.activeMonsters[m].FRcounter = 0
 
-		else {
+				
 
-			gameState.monster.FRcounter += 1
+			}
 
-			if (gameState.monster.currentCol == gameState.player.currentCol && gameState.monster.currentRow == gameState.player.currentRow) {
+			else {
 
-					console.log("dead")
+				gameState.activeMonsters[m].FRcounter += 1
 
+				if (gameState.activeMonsters[m].currentCol == gameState.player.currentCol && gameState.activeMonsters[m].currentRow == gameState.player.currentRow) {
 
-				if (confirm("Bad Job, play again? Y/N?")) {
-
-					renderFrame(gameState)
-
-
-					console.log("yes")
+						console.log("dead")
 
 
-					prestigeMaze(11, 11)
+						if (confirm("Bad Job, play again? Y/N?")) {
+
+							renderFrame(gameState)
+
+
+							console.log("yes")
+
+
+							prestigeMaze(11, 11)
 
 
 
-				}
+					}
 
-				else {
+						else {
 
-					console.log("beef")
+							console.log("beef")
+
+					}
 
 				}
 
