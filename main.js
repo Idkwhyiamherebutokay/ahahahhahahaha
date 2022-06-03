@@ -13,39 +13,88 @@ let blocker = Math.min(window.innerHeight, window.innerWidth)
 context.canvas.width  = blocker;
 context.canvas.height = blocker;
 
-let monsterSets = {
+//monster zone
 
-	set0:{
+class troglobite {
 
-		minLevel: 0,
+    cost = 50;
 
-		mustSpawn: [],
+  constructor() {
+
+    this.type = "t";
+
+    this.speed = 1;
+
+    this.respectsWalls = true; //interacts with walls
+
+    this.currentState = 0; //0: idle(random), 1: hunt(greedyBest), 2: seek(randomChase)
+
+    this.reluctance = 1; //Determines how many spaces back the monster won't go
+
+    this.moveHistory = [];
+
+    this.FR = 10 //10 is defult testing speed, WHOOP
+
+    this.FRcounter = 0;
+
+    this.power = 1;
+
+    this.idleType = "random"; //0: random,
+
+    this.huntType = "greedyBest"; //1: greedyBest,
+
+    this.seekType = "randomChase"; //2: randomChase,
+
+    this.difficulty = "basic";
+
+    this.currentCol = 0;
+
+    this.currentRow = 0;
+
+  }
+}
+
+
+//end of monster zone
+
+
+let monsterSets = [
+
+	{
+
+		name: "set0",
+
+		minBudget: 10,
+
+		mustSpawn: [troglobite, troglobite, troglobite],
 
 		spawnlist: [troglobite]
 
 		},
 
-	set1:{
+	{
+		name: "set1",
 
-		minLevel: 1,
+		minBudget: 100,
 
-		mustSpawn: [],
+		mustSpawn: [troglobite, troglobite, troglobite],
 
 		spawnlist: [troglobite]
 
 		},
 
-		setBoss:{
+	{
+		name: "setBoss",
 
-		minLevel: 2,
+		minBudget: 200,
 
-		mustSpawn: [troglobite],
+		mustSpawn: [troglobite, troglobite, troglobite],
 
 		spawnlist: [troglobite]
 
 		}
 
-}
+]
 
 
 
@@ -387,9 +436,7 @@ const mazeGen = (mazeMap, row, coll) => {
 
 			mazeMap = delWallNB(mazeMap, row, coll, shuffled[per][0], shuffled[per][1])
 
-	//		
-
-	//  	mapAlg(mazeMap)
+			// mapAlg(mazeMap)
 
 			// //(mazeMap)
 
@@ -498,6 +545,115 @@ let genPosArea = (x1, y1, w, h) => {
 }
 
 
+
+
+let monGen = (gameState) => {
+
+	let budget = (gameState.amountCol * gameState.amountRow) * 100 //instead of times 1, have it be * evil
+
+	console.log("monster budget", budget)
+
+	let monQue = []
+
+	let monSpawnFiltered = monsterSets.filter((bud) => {
+
+		if(bud.minBudget <= budget) {
+
+			return true
+
+		}
+
+		else {
+
+			return false
+
+		}
+
+	}
+
+	)
+
+		let monSpawnShuffled = monSpawnFiltered[randomRange(0, monSpawnFiltered.length)]
+
+		for(let i = 0; i < monSpawnShuffled.mustSpawn.length; i ++) {
+
+			console.log("test 43", monSpawnShuffled.mustSpawn[i])
+
+			const m = new monSpawnShuffled.mustSpawn[i]()
+
+			monQue.push(m)
+
+
+			console.log("cost right before that", m.cost)
+
+
+			budget -= m.cost //bandaid
+
+
+
+
+
+		}
+
+		let barginBinMon = monSpawnShuffled.spawnlist.filter((bud) => { 
+
+			if(budget >=  (new bud()).cost) {
+
+			return true
+
+		}
+
+		else {
+
+			return false
+		}
+
+	}
+
+	)
+
+
+
+	while(budget > 0 && barginBinMon.length > 0) {
+
+		console.log("spawn loop start")
+
+
+		let monSpawnChosen = barginBinMon[randomRange(0,barginBinMon.length)]
+
+		const n = new monSpawnChosen()
+
+		budget -= n.cost
+
+		monQue.push(n)
+
+		
+
+		barginBinMon = monSpawnShuffled.spawnlist.filter((bud) => { 
+
+			if(budget >= (new bud()).cost) {
+
+				return true
+
+			}
+
+			else {
+
+					return false
+
+			}
+
+		}
+		
+		)
+
+
+	}
+
+		return monQue
+
+}
+
 const prestigeMaze = (rows, colls) => {
 
 
@@ -513,11 +669,15 @@ const prestigeMaze = (rows, colls) => {
 
 	let mopler = grid(rows, colls) 
 
+	let numTiles = rows * colls
+
 	// //(mopler)
 
 	gameState.finishedMaze = mazeGen(mopler, 1, 1)
 
 	gameState.finishedMaze = wallDeGen(0.1, gameState.finishedMaze)
+
+	gameState.activeMonsters = monGen(gameState)
 
 
 
@@ -813,47 +973,6 @@ let checkKey = (e) => {
 
 document.onkeydown = checkKey;
 
-//monster zone
-
-class troglobite {
-  constructor() {
-
-    this.type = "t";
-
-    this.speed = 1;
-
-    this.respectsWalls = true; //interacts with walls
-
-    this.currentState = 0; //0: idle(random), 1: hunt(greedyBest), 2: seek(randomChase)
-
-    this.reluctance = 1; //Determines how many spaces back the monster won't go
-
-    this.moveHistory = [];
-
-    this.FR = 10 //10 is defult testing speed, WHOOP
-
-    this.FRcounter = 0;
-
-    this.power = 1;
-
-    this.idleType = "random"; //0: random,
-
-    this.huntType = "greedyBest"; //1: greedyBest,
-
-    this.seekType = "randomChase"; //2: randomChase,
-
-    this.difficulty = "basic";
-
-    this.currentCol = 0;
-
-    this.currentRow = 0;
-
-
-  }
-}
-
-
-//end of monster zone
 
 
 let gameState = {
