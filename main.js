@@ -916,6 +916,8 @@ let dryStrawsMon = (gameState, monster) => {
 
 	let distances = {}
 
+	let que = [`${monster.currentRow}:${monster.currentCol}`]
+
 	let parents = {}
 
 	let playerKey = `${player.currentRow}:${player.currentCol}`
@@ -939,6 +941,30 @@ let dryStrawsMon = (gameState, monster) => {
 
 		parents[childKey] = parentKey
 	}
+
+	while (que.length) {
+
+
+		let latestNode = que.shift()
+
+		let latestNodeNBsNoWalls = removeWallsFromNBlist(gameState, parseInt(latestNode.split(":")[0]), parseInt(latestNode.split(":")[1]) )
+
+		for(let nb of latestNodeNBsNoWalls) {
+
+			let NBKey = `${nb[0]}:${nb[1]}` 
+
+			que.push(NBKey)
+
+			parents[NBKey] = latestNode
+			
+			let totalDistance = distances[latestNode] + 1
+
+		}
+
+	}
+
+
+
 
 
 }
