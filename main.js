@@ -15,223 +15,6 @@ context.canvas.height = blocker;
 
 //monster zone
 
-class troglobite {
-
-    cost = 50;
-
-    color = "grey";
-
-  constructor() {
-
-    this.type = "t";
-
-    this.speed = 1;
-
-    this.respectsWalls = true; //interacts with walls
-
-    this.currentState = 0; //0: idle(random), 1: hunt(greedyBest), 2: seek(randomChase)
-
-    this.reluctance = 1; //Determines how many spaces back the monster won't go
-
-    this.moveHistory = [];
-
-    this.FR = 10; //10 is defult testing speed, WHOOP
-
-    this.FRcounter = 0;
-
-    this.power = 1;
-
-    this.idleType = "random"; //0: random,
-
-    this.huntType = "none"; //1: greedyBest,
-
-    this.seekType = "none"; //2: randomChase,
-
-    this.difficulty = "basic";
-
-    this.currentCol = 0;
-
-    this.currentRow = 0;
-
-    this.sight = "none";
-
-  	this.hearing = "none";
-
-
-
-  }
-
-    senses() {
-
- 	 }
-
-}
-
-class vanilla {
-
-    cost = 200;
-
-    color = "#f2f0d0";
-
-  constructor() {
-
-    this.type = "t";
-
-    this.speed = 1;
-
-    this.respectsWalls = true; //interacts with walls
-
-    this.currentState = 0; //0: idle(random), 1: hunt(greedyBest), 2: seek(randomChase)
-
-    this.reluctance = 1; //Determines how many spaces back the monster won't go
-
-    this.moveHistory = [];
-
-    this.FR = 10 //10 is defult testing speed, WHOOP
-
-    this.FRcounter = 0;
-
-    this.power = 1;
-
-    this.idleType = "random"; //0: random,
-
-    this.huntType = "none"; //1: greedyBest,
-
-    this.seekType = "none"; //2: randomChase,
-
-    this.difficulty = "basic";
-
-    this.currentCol = 0;
-
-    this.currentRow = 0;
-
-    this.sight = "normal";
-
-  	this.hearing = "normal";
-
-  }
-
-    senses(gameState) {
-
-
-    	if(this.currentRow == gameState.player.currentRow) {
-
-    		console.log("checkpoint")
-
-    		let greb = this.currentCol
-
-    		if(greb - gameState.player.currentCol > 0) { //monster to the right
-
-    			for(let meb = greb; meb > gameState.player.currentCol; meb -= 1) {
-
-    				if(gameState.finishedMaze[this.currentRow][meb] == "#") {
-
-    					console.log("wallCol")
-
-    					return "wallCol"
-
-    				}
-
-    			}
-
-    			console.log("hunt")
-
-    			this.currentState = 1
-
-    		}
-
-    	
-
-
-
-
-    	else if(greb - gameState.player.currentCol < 0) { //monster to the left
-
-    		console.log("checkpoint")
-
-    		for(let meb = greb; meb < gameState.player.currentCol; meb += 1) {
-
-    			if(gameState.finishedMaze[this.currentRow][meb] == "#") {
-
-    				console.log("wallChalk")
-
-    				return "wallCol"
-
-    			}
-
-    		}
-
-    		console.log("hunt")
-
-    		this.currentState = 1
-    			
-    	}
-   	 }
-    	
-
-  	
-
-  	else if(this.currentCol == gameState.player.currentCol) {
-
-  		console.log("checkpoint")
-
-
-    	let berg = this.currentRow
-
-    	if(berg - gameState.player.currentRow > 0) { //above
-
-    		console.log("checkpoint")
-
-    		for(let bem = berg; bem > gameState.player.currentRow; bem -= 1) {
-
-    			if(gameState.finishedMaze[bem][this.currentCol] == "#") {
-
-    				console.log("wallrow")
-
-    				return "wallrol"
-
-    			}
-
-    		}
-
-    		console.log("hunt")
-
-    		this.currentState = 1
-
-    	}
-
-
-
-    	else if(berg - gameState.player.currentRow < 0) { //below
-
-    		console.log("chalkpoint")
-
-    		for(let bem = berg; bem < gameState.player.currentRow; bem += 1) {
-
-    			if(gameState.finishedMaze[bem][this.currentCol] == "#") {
-
-    				console.log("wallrow")
-
-    				return "wallrol"
-
-    			}
-
-    		}
-
-    		console.log("hunt")
-
-    		this.currentState = 1
-
-
-
-    			
-    	}
-
-  	  }
-
-  	}
-
-}
 
 
 //end of monster zone
@@ -241,38 +24,15 @@ let monsterSets = [
 
 	{
 
-		name: "set0",
+		name: "test",
 
 		minBudget: 10,
 
-		mustSpawn: [vanilla, troglobite, troglobite],
+		mustSpawn: [vanilla, troglobite],
 
-		spawnlist: [troglobite]
-
-		},
-
-	{
-		name: "set1",
-
-		minBudget: 100,
-
-		mustSpawn: [vanilla, troglobite, troglobite],
-
-		spawnlist: [troglobite]
+		spawnlist: []
 
 		},
-
-	{
-		name: "setBoss",
-
-		minBudget: 200,
-
-		mustSpawn: [vanilla, troglobite, troglobite],
-
-		spawnlist: [troglobite]
-
-		}
-
 ]
 
 
@@ -912,56 +672,95 @@ let drawPlayer = (gameState) => {
 
 let dryStrawsMon = (gameState, monster) => {
 
-	let validPathNBs = removeWallsFromNBlist(gameState.finishedMaze, monster.currentRow, monster.currentCol)
+	console.log("this is important", gameState.finishedMaze)
+
+	let validPathNBs = removeWallsFromNBlist(gameState, monster.currentRow, monster.currentCol)
 
 	let distances = {}
 
-	let que = [`${monster.currentRow}:${monster.currentCol}`]
+	let startCords = `${monster.currentRow}:${monster.currentCol}`
 
-	let parents = {}
+	let que = [startCords]
+
+    let parents = {}
+
+    parents[startCords] = null
+
+	let player = gameState.player
 
 	let playerKey = `${player.currentRow}:${player.currentCol}`
 
-	distances[playerKey] = Infinity
-
-	visited = {}
-
-	let visitedKey = `${monster.currentRow}:${monster.currentCol}`
-
-	visited[visitedKey] = true
-
-
-	for(i = 0; i < validPathNBs.length; i ++) {
-
-        let key = `${validPathNBs[i][0]}:${validPathNBs[i][1]}`
-
-		distances[key] = 1
-
-		let parentKey = `${monster.currentRow}:${monster.currentCol}`
-
-		parents[childKey] = parentKey
-	}
+	let visited = {}
 
 	while (que.length) {
 
 
 		let latestNode = que.shift()
 
+		if(visited.hasOwnProperty(latestNode )) {
+
+			continue
+
+		}
+
 		let latestNodeNBsNoWalls = removeWallsFromNBlist(gameState, parseInt(latestNode.split(":")[0]), parseInt(latestNode.split(":")[1]) )
 
 		for(let nb of latestNodeNBsNoWalls) {
 
-			let NBKey = `${nb[0]}:${nb[1]}` 
+			let NBKey = `${nb[0]}:${nb[1]}`    // imagine this is startCords
 
 			que.push(NBKey)
 
-			parents[NBKey] = latestNode
-			
 			let totalDistance = distances[latestNode] + 1
+
+			if (!visited.hasOwnProperty(NBKey) && (!distances[NBKey] ||  totalDistance < distances[NBKey])) {
+
+				parents[NBKey] = latestNode
+
+				distances[NBKey] = totalDistance
+
+			}
+
+			
 
 		}
 
+
+		visited[latestNode] = true
+
+		
+
 	}
+
+
+	let jerf = true
+
+		let jeb = 0
+
+		let listed = []
+
+		listed.push(playerKey)
+
+        let curr = parents[playerKey]
+
+		listed.push(curr)
+
+		console.log(parents, "parents")
+
+		while(curr) {
+
+                curr = parents[curr]
+				if (curr) {
+					listed.push(curr)
+				}
+
+
+
+
+
+		}
+
+		return [parseInt(listed[listed.length - 2].split(':')[0]), parseInt(listed[listed.length - 2].split(':')[1])]
 
 
 
@@ -971,7 +770,7 @@ let dryStrawsMon = (gameState, monster) => {
 
 let removeWallsFromNBlist = (gameState, row, col) => {
 
-	let preNBChoice = locateMonsterNB(gamestate.finishedmaze, row, col)
+	let preNBChoice = locateMonsterNB(gameState.finishedMaze, row, col)
 
 	let NBChoice = preNBChoice.filter((i, nb) => {
 		// if nb meets some condition, return true
@@ -1053,84 +852,17 @@ let moveMonster = (gameState, monster) => {
 
 	if (monster.currentState == 0) {
 
-		//random idle start
-		//setup if(monster.idleType == random)
-		let monChosen = shuffleNB(monChoice)
-
-		console.log("monChosen", monChosen)
-
-		console.log(monster.currentCol, "monster currentCol")
-
-		console.log(monster.currentRow, "monster currentRow")
-
-		console.log("moveHistory 1", JSON.stringify(monster.moveHistory))
-
-		let bog = 0
-
-		for(let bog = 0;bog < monChosen.length; bog++) {
-
-			if(!monster.moveHistory.includes(`${monChosen[bog][0]}:${monChosen[bog][1]}`) && monChosen.length > 1) {
-
-
-				monster.moveHistory.push(`${monster.currentRow}:${monster.currentCol}`)
-
-				monster.currentCol = monChosen[bog][1]
-
-				monster.currentRow = monChosen[bog][0]
-
-
-
-				if(monster.moveHistory.length > monster.reluctance) {
-
-					monster.moveHistory = monster.moveHistory.slice(1)
-
-					console.log("shifted")
-
-
-				}
-
-	            console.log("moveHistory 2", JSON.stringify(monster.moveHistory))
-
-	       
-
-				return monster
-
-			}
-
-			else if (monChosen.length == 1) {
-
-				monster.moveHistory.push(`${monster.currentRow}:${monster.currentCol}`)
-
-				monster.currentCol = monChosen[bog][1]
-
-				monster.currentRow = monChosen[bog][0]
-
-					if(monster.moveHistory.length > monster.reluctance) {
-
-						monster.moveHistory = monster.moveHistory.slice(1)
-
-						console.log("shifted")
-						
-					}
-
-				console.log("moveHistory 3", JSON.stringify(monster.moveHistory))
-
-				return monster
-
-
-			}
-
-
-	}
+        monster.idle()   // could be vanilla, could be troglobite, could  be  anything
+		
 
 	//random idle end
 
 	}
 
-	else if (monster == 1) { //basic hunt
+	else if (monster.currentState == 1) { //basic hunt
 
-		
 
+		monster.hunt()
 
 
 	}
